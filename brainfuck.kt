@@ -2,6 +2,8 @@ import java.util.*
 
 class BrainLuck(private val code: String) {
   
+  private var codePtr = 0
+  
   private val memory = HashMap<Int, Byte>()
   
   private var dataPtr = 0
@@ -10,7 +12,7 @@ class BrainLuck(private val code: String) {
     get() = memory[dataPtr] ?: 0
     set(value: Byte) { memory[dataPtr] = value }
   
-  private var codePtr = 0
+  
 	
   fun process(input: String): String {
     var inputPtr = 0
@@ -21,8 +23,8 @@ class BrainLuck(private val code: String) {
       when (code[codePtr]) {
         '>' -> dataPtr++
         '<' -> dataPtr--
-        '+' -> mem = ++mem
-        '-' -> mem = --mem
+        '+' -> mem++
+        '-' -> mem--
         '.' -> if (mem == 255.toByte()) break@loop else output.append(mem.toChar().toString())
         ',' -> mem = input[inputPtr++].toByte()
         '[' -> if (mem == 0.toByte()) codePtr = parens[codePtr]!!
@@ -41,12 +43,18 @@ class BrainLuck(private val code: String) {
       if (ch == '[')
         stack.push(i)
       if (ch == ']') {
+        if (stack.empty())
+          throw IllegalArgumentException("']' without a matching '[' on position $i")
         parens[i] = stack.pop()
         parens[parens[i]!!] = i // bidirectional map
       }
     }
     
+    if (!stack.empty())
+      throw IllegalArgumentException("'[' without a matching ']' on position ${stack.pop()}")
+    
     return parens
-  } 
+  }
+  
   
 }
